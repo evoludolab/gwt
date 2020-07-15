@@ -165,7 +165,7 @@ public class Tree extends Widget implements HasTreeItems.ForIsWidget, HasWidgets
   }
 
   static native boolean shouldTreeDelegateFocusToElement(Element elem) /*-{
-    var name = elem.nodeName;
+    var name = elem.nodeName.toUpperCase();
     return ((name == "SELECT") ||
         (name == "INPUT")  ||
         (name == "TEXTAREA") ||

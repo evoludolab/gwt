@@ -29,8 +29,8 @@ import java.util.Comparator;
 import java.util.Locale;
 import java.util.StringJoiner;
 import javaemul.internal.ArrayHelper;
+import javaemul.internal.Coercions;
 import javaemul.internal.EmulatedCharset;
-import javaemul.internal.HashCodes;
 import javaemul.internal.JsUtils;
 import javaemul.internal.NativeRegExp;
 import javaemul.internal.annotations.DoNotInline;
@@ -376,8 +376,8 @@ public final class String implements Comparable<String>, CharSequence,
   public int compareTo(String other) {
     // Trick compiler into thinking that these are double so what we could do arithmetic comparison
     // which is supported on underlying JavaScript strings.
-    double a = JsUtils.unsafeCastToDouble(checkNotNull(this));
-    double b = JsUtils.unsafeCastToDouble(checkNotNull(other));
+    double a = JsUtils.<Double>uncheckedCast(this);
+    double b = JsUtils.<Double>uncheckedCast(other);
     return a == b ? 0 : (a < b ? -1 : 1);
   }
 
@@ -454,7 +454,12 @@ public final class String implements Comparable<String>, CharSequence,
 
   @Override
   public int hashCode() {
-    return HashCodes.getStringHashCode(this);
+    int h = 0;
+    for (int i = 0; i < length(); i++) {
+      // Following is the common hash function '(31 * h + x)' as '(x << 5) - x' equal to '31 * x'.
+      h = Coercions.ensureInt((h << 5) - h + charAt(i));
+    }
+    return h;
   }
 
   public int indexOf(int codePoint) {
